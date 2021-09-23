@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<!-- saved from url=(0046)https://mcbeeringi.github.io/apps/mc/poly.html -->
+<html lang="en" dir="ltr">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <title>MCDB</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.3/react.js"></script>
+<script type="text/javascript" src="jquery-1.9.1.js"></script>
+
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<body onLoad="startFunc()">
+    
+    <style>
+        :root,
+        textarea,
+        input {
+            background-color: #222;
+            color: #fff;
+            font-family: menlo, monospace;
+        }
+
+        .box {
+            background-color: #333;
+            padding: 4px;
+            font-size: 13px;
+        }
+
+        a:link,
+        a:visited {
+            color: #aef;
+        }
+
+        a:link:hover {
+            color: #8af;
+        }
+
+        a:link:active {
+            color: #48f;
+        }
+
+        h1,
+        h2 {
+            padding: 0rem 1rem;
+            border-left: 4px solid #000;
+        }
+
+        textarea {
+            background-color: #0000;
+            line-height: 14px;
+            min-height: 92px;
+            max-height: 448px;
+            width: calc(100% - 8px);
+            overflow: scroll;
+            resize: vertical;
+        }
+
+        #log {
+            line-height: 14px;
+            max-height: 448px;
+            overflow: scroll;
+            background-color: #333;
+        }
+
+        input:not([type=radio]) {
+            background-color: #0000;
+            display: inline-block;
+            border: none;
+            border-bottom: 2px solid #888;
+            border-radius: 0;
+            min-width: 20em;
+            max-width: 100%;
+            outline: none;
+            transition: .2s;
+        }
+
+        input:not([type=radio]):focus {
+            border-bottom-color: #48fc;
+        }
+
+        button {
+            background-color: rgb(209, 209, 209);
+            padding: 0px;
+            border-radius: 2px;
+            user-select: none;
+            -webkit-user-select: none;
+            display: inline-block;
+        }
+
+        .button:active {
+            background-color: #48fc;
+        }
+    </style>
+
+
+    <h1>MC CODEUOUO Database</h1>
+    <div class="box">
+        <h2>?!?INFOめーしょん?!?</h2>
+        <br>Minecraft wiiuEdition内で使えるコードを集めたサイトです<br>
+        <br>総数16000くらいあります↓<br>
+        <br>動作確認はすべてしてないのでフリーズする確率が高いです(コード集めただけ<br>
+        <br>古いものとか混じってるので見極めてね☆<br>
+        <br>
+        <textarea name="resultt" id="" cols="30" rows="6" hidden=true></textarea>
+    </div>
+    <br>
+    <div class="box">
+        <div>
+            最大表示件数
+            <input type="number" id="Display_limit" min="500" step="1000" value="1000">
+            <button onclick="updateCodetable()">再表示</button>
+
+        </div>
+        <br>
+        <div>
+            検索:
+            <input type="text" id="sarchtext" size="3" onchange="">
+        </div>
+        <div id="codesT">
+            <table id="codetable" border="1">
+                <tr>
+                    <th>index</th>
+                    <th>code</th>
+                    <th>name</th>
+                    <th>comment</th>
+                    <th>length</th>
+                    <th>raw_assembly</th>
+                    <th>assembly_ram_write</th>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <div id="xmldata" data="">
+    </div>
+    <div id="temp" data="">
+    </div>
+    <div class="box" id="table"></div>
+    <img src="/cgi-bin/Count.cgi?df=sample"><br>
+    <div id="qrcode"></div>
+    <div id="datas" data="">
+    </div>
+</body>
+
+<script>
+    let datas;
+    codetable;
+    index = false;
+    datatable = {
+        "codes": []
+    };
+    odatatable = {
+        "codes": []
+    };
+
+    var btn = document.getElementById('exe_botan');
+
+    // Enterキー押下時、送信処理が実行する
+    window.document.onkeydown = function (event) {
+        if (event.key === 'Enter') {
+            search();
+        }
+    }
+
+    function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+    function execCopy(string) {
+
+        // 空div 生成
+        var tmp = document.createElement("div");
+        // 選択用のタグ生成
+        var pre = document.createElement('pre');
+
+        // 親要素のCSSで user-select: none だとコピーできないので書き換える
+        pre.style.webkitUserSelect = 'auto';
+        pre.style.userSelect = 'auto';
+
+        tmp.appendChild(pre).textContent = string;
+
+        // 要素を画面外へ
+        var s = tmp.style;
+        s.position = 'fixed';
+        s.right = '200%';
+
+        // body に追加
+        document.body.appendChild(tmp);
+        // 要素を選択
+        document.getSelection().selectAllChildren(tmp);
+
+        // クリップボードにコピー
+        var result = document.execCommand("copy");
+
+        // 要素削除
+        document.body.removeChild(tmp);
+
+        return result;
+    }
+
+    function truncateString(str, num) {
+        if (str.length <= num) {
+            return str;
+        } else {
+            return str.slice(0, num > 3 ? num - 3 : num) + '...';
+        }
+    }
+
+    function startFunc() {
+        console.log("fuxk");
+        fileload("file3.xml");
+    }
+
+    function fileload(filename) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open("GET", filename, true);
+        xmlHttp.send(null);
+        xmlHttp.onload = function () {
+            if (xmlHttp.status === 200) {
+                let separate1 = /\r\n/;
+                let separate2 = ",";
+                let data_org = xmlHttp;
+                const parser = new window.DOMParser();
+                datas = document.getElementById("datas");
+                datas.XML = parser.parseFromString(data_org.response, "text/xml");
+
+                datas.entries = datas.XML.getElementsByTagName("entry");
+                let tc = 0;
+                for (let entry of datas.entries) {
+                    let name = entry.getAttribute("name");
+                    let code = entry.getElementsByTagName("code")[0].textContent;
+                    let authors = entry.getElementsByTagName("authors")[0].textContent;
+                    let raw_assembly = entry.getElementsByTagName("raw_assembly")[0].textContent;
+                    let assembly_ram_write = entry.getElementsByTagName("assembly_ram_write")[0].textContent;
+                    let comment = entry.getElementsByTagName("comment")[0].textContent;
+                    let codelength = code.split(/[-_ ]+/).length - 1;
+
+                    let Cdata = {
+                        index: tc,
+                        name: name,
+
+                        comment: comment,
+                        authors: authors,
+                        codelength: codelength,
+                        code: code,
+                        raw_assembly: raw_assembly,
+                        assembly_ram_write: assembly_ram_write
+                    }
+                    datatable.codes.push(Cdata);
+                    tc++;
+                }
+                odatatable = datatable;
+                updateCodetable();
+
+            }
+        };
+    };
+
+    function updateCodetable() {
+        document.getElementById("codetable").remove();
+        codesT = document.getElementById("codesT");
+        var codetable = document.createElement('table');
+        codetable.id = "codetable";
+        codetable.border = "1";
+
+        //function appendtd(string,elm){
+        //    var e2 = document.createElement('td');
+        //    e2.id = string;
+        //    e2.value = false;
+        //    e2.onclick = "index()";
+        //    e2.innerText = string;
+        //    elm.appendChild(e2);
+        //}
+        (function () {
+            var he = document.createElement('tr');
+            //appendtd("index",he);
+            //appendtd("name",he);
+            //appendtd("comment",he);
+            //appendtd("length",he);
+            //appendtd("code",he);
+            //appendtd("raw_assembly",he);
+            //appendtd("assembly_ram_write",he);
+
+            var e2 = document.createElement('td');
+            e2.innerText = "index-";
+            var b = document.createElement('button');
+            b.onclick = function () {
+                index = !index;
+                if (index) {
+                    datatable.codes.sort(function (a, b) {
+                        if (a["index"] > b["index"]) return -1;
+                        if (a["index"] < b["index"]) return 1;
+                        return 0;
+                    })
+                    updateCodetable();
+                } else {
+                    datatable.codes.sort(function (a, b) {
+                        if (a["index"] > b["index"]) return 1;
+                        if (a["index"] < b["index"]) return -1;
+                        return 0;
+                    })
+                    updateCodetable();
+                }
+            };
+            b.innerText = "↨";
+            e2.appendChild(b);
+            he.appendChild(e2);
+
+            var e2 = document.createElement('td');
+            e2.innerText = "name-------------------";
+            var b = document.createElement('button');
+            b.onclick = function () {
+                index = !index;
+                if (index) {
+                    datatable.codes.sort(function (a, b) {
+                        if (a["name"] > b["name"]) return -1;
+                        if (a["name"] < b["name"]) return 1;
+                        return 0;
+                    })
+                    updateCodetable();
+                } else {
+                    datatable.codes.sort(function (a, b) {
+                        if (a["name"] > b["name"]) return 1;
+                        if (a["name"] < b["name"]) return -1;
+                        return 0;
+                    })
+                    updateCodetable();
+                }
+            };
+            b.innerText = "↨";
+            e2.appendChild(b);
+            he.appendChild(e2);
+
+            var e2 = document.createElement('td');
+            e2.innerText = "comment----";
+            var b = document.createElement('button');
+            b.onclick = function () {
+                index = !index;
+                if (index) {
+                    datatable.codes.sort(function (a, b) {
+                        if (a["comment"] > b["comment"]) return -1;
+                        if (a["comment"] < b["comment"]) return 1;
+                        return 0;
+                    })
+                    updateCodetable();
+                } else {
+                    datatable.codes.sort(function (a, b) {
+                        if (a["comment"] > b["comment"]) return 1;
+                        if (a["comment"] < b["comment"]) return -1;
+                        return 0;
+                    })
+                    updateCodetable();
+                }
+            };
+            b.innerText = "↨";
+            e2.appendChild(b);
+            he.appendChild(e2);
+
+            var e2 = document.createElement('td');
+            e2.innerText = "authors-----";
+            var b = document.createElement('button');
+            b.onclick = function () {
+                index = !index;
+                if (index) {
+                    datatable.codes.sort(function (a, b) {
+                        if (a["authors"] > b["authors"]) return -1;
+                        if (a["authors"] < b["authors"]) return 1;
+                        return 0;
+                    })
+                    updateCodetable();
+                } else {
+                    datatable.codes.sort(function (a, b) {
+                        if (a["name"] > b["name"]) return 1;
+                        if (a["name"] < b["name"]) return -1;
+                        return 0;
+                    })
+                    updateCodetable();
+                }
+            };
+            b.innerText = "↨";
+            e2.appendChild(b);
+            he.appendChild(e2);
+
+            var e2 = document.createElement('td');
+            e2.innerText = "length-";
+            var b = document.createElement('button');
+            b.onclick = function () {
+                index = !index;
+                if (index) {
+                    datatable.codes.sort(function (a, b) {
+                        if (a["codelength"] > b["codelength"]) return -1;
+                        if (a["codelength"] < b["codelength"]) return 1;
+                        return 0;
+                    })
+                    updateCodetable();
+                } else {
+                    datatable.codes.sort(function (a, b) {
+                        if (a["codelength"] > b["codelength"]) return 1;
+                        if (a["codelength"] < b["codelength"]) return -1;
+                        return 0;
+                    })
+                    updateCodetable();
+                }
+            };
+            b.innerText = "↨";
+            e2.appendChild(b);
+            he.appendChild(e2);
+
+            var e2 = document.createElement('td');
+            e2.innerText = "code";
+            he.appendChild(e2);
+            var e2 = document.createElement('td');
+            e2.innerText = "raw_assembly";
+            he.appendChild(e2);
+            var e2 = document.createElement('td');
+            e2.innerText = "assembly_ram_write";
+            var b = document.createElement('button');
+            b.onclick = function () {
+                index = !index;
+                if (index) {
+                    datatable.codes.sort(function (a, b) {
+                        if (a["assembly_ram_write"] > b["assembly_ram_write"]) return -1;
+                        if (a["assembly_ram_write"] < b["assembly_ram_write"]) return 1;
+                        return 0;
+                    })
+                    updateCodetable();
+                } else {
+                    datatable.codes.sort(function (a, b) {
+                        if (a["assembly_ram_writeh"] > b["assembly_ram_write"]) return 1;
+                        if (a["assembly_ram_write"] < b["assembly_ram_write"]) return -1;
+                        return 0;
+                    })
+                    updateCodetable();
+                }
+            };
+            b.innerText = "↨";
+            e2.appendChild(b);
+            he.appendChild(e2);
+
+            codetable.appendChild(he);
+        }());
+
+        let count = 0;
+        for (let i = 0; i < datatable.codes.length; i++) {
+
+            let code = datatable.codes[i];
+
+            if (i > document.getElementById("Display_limit").value) break;
+            var element = document.createElement('tr');
+
+            for (let tag in code) {
+                var e2 = document.createElement('td');
+
+                switch (tag) {
+                    case "comment":
+                        if (code["comment"].length == 0) {
+                            e2.innerText = ".nothing";
+                        } else {
+                            e2.innerText = truncateString(code["comment"], 40)
+                            var cbutton = document.createElement('button');
+                            cbutton.innerText = "coppy";
+                            cbutton.onclick = function () {
+                                execCopy(code["comment"]);
+                            };
+                            e2.appendChild(cbutton);
+                        }
+                        break;
+                    case "name":
+                        if (code["name"].length == 0) {
+                            e2.innerText = ".nullName";
+                        } else {
+                            e2.innerText = truncateString(code["name"], 30)
+                        }
+                        break;
+                    case "authors":
+                        if (code["authors"].length == 0) {
+                            e2.innerText = ".nullAuthors";
+                        } else {
+                            e2.innerText = truncateString(code["authors"], 30)
+                        }
+                        break;
+                    case "code":
+                        var cbutton = document.createElement('button');
+                        cbutton.innerText = "coppy";
+                        cbutton.onclick = function () {
+                            execCopy(code["code"]);
+                        };
+                        e2.appendChild(cbutton);
+                        break;
+                    default:
+                        e2.innerText = code[tag];
+                }
+
+                element.appendChild(e2);
+            }
+
+            codetable.appendChild(element);
+        }
+        codesT.appendChild(codetable);
+    }
+
+    function search() {
+        let text = document.getElementById('sarchtext').value;
+        alert(text);
+        datatable.codes.sort(function (a, b) {
+            //console.log(a["name"])
+            if (lD(a["name"],text)/a["name"].length > lD(b["name"],text)/b["name"].length) return 1;
+            if (lD(a["name"],text)/a["name"].length < lD(b["name"],text)/b["name"].length) return -1;
+
+            return 0;
+        })
+        updateCodetable()
+    }
+
+    function lD(str1, str2) {
+        str1 = str1.toLowerCase();
+        str2 = str2.toLowerCase();
+        let r, c, cost,
+            d = [];
+
+        for (r = 0; r <= str1.length; r++) {
+            d[r] = [r];
+        }
+        for (c = 0; c <= str2.length; c++) {
+            d[0][c] = c;
+        }
+        for (r = 1; r <= str1.length; r++) {
+            for (c = 1; c <= str2.length; c++) {
+                cost = str1.charCodeAt(r - 1) == str2.charCodeAt(c - 1) ? 0 : 1;
+                d[r][c] = Math.min(d[r - 1][c] + 1, d[r][c - 1] + 1, d[r - 1][c - 1] + cost);
+            }
+        }
+
+        return d[str1.length][str2.length]/GC(str1,str2);
+    }
+
+    function GC(tex,s){
+        return ( tex.match( new RegExp( s, "g" ) ) || [] ).length+1;
+    }
+
+    function translate(string){
+        return new google.translate.TranslateElement({
+            pageLanguage: 'ja', 
+            layout: google.translate.TranslateElement.FloatPosition.TOP_LEFT
+        }, 'google_translate_element');
+    }
+</script>
+
+</html>
